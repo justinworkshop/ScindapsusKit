@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>com.your.company.unique.plugin.id</id>
+    <name>ScindapsusKitPlugin</name>
+    <version>1.0</version>
+    <vendor email="weixzheng@tencent.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+    <description><![CDATA[
+      Enter short description for your plugin here.<br>
+      <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>
+    ]]>
+    </change-notes>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="173.0"/>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- 需要添加依赖，否则提示 NoClassDefFoundError: com/intellij/psi/PsiClass -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <group text="ScindapsusKit" description="Scindapsus Menu">
+            <add-to-group group-id="MainMenu" anchor="last"/>
+            <action id="ButterKnifePlugin" class="action.ButterKnifePlugin" text="ButterKnife">
+                <add-to-group group-id="GenerateGroup" anchor="first"/>
+            </action>
+        </group>
+    </actions>
+
+</idea-plugin>
