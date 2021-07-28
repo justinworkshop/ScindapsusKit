@@ -67,11 +67,14 @@ public class StaticMethodReplaceDialog extends MyRefactoringDialog {
 
     @Override
     protected void doAction() {
+        //获取勾选的方法
         Collection<MemberInfo> extractMember = getSelectedMemberInfos();
         String packName = getTargetPackageName();
         String newClz = getExtractedSuperName();
 
         //需要进行替换的方法列表
+        //PsiMethod:getInfo
+        //PsiMethod:sendMessage
         List<PsiMethod> methodList = new ArrayList<>();
         for (MemberInfo info : extractMember) {
             if (info.getMember() instanceof PsiMethod) {

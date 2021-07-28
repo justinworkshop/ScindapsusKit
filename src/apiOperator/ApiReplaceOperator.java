@@ -54,29 +54,35 @@ public class ApiReplaceOperator {
             }));
         }
 
-        //逐一方法替换 PsiClass:MainUtil
+        //逐一方法替换 oldClass: PsiClass:MainUtil
         //PsiMethod:getInfo
         //PsiMethod:sendMessage
         PsiMethod[] methodNeedToReplace = oldClass.getMethods();
         for (PsiMethod method : methodNeedToReplace) {
             //如果需要替换该方法
-            Collection<PsiReference> allRef = ReadAction.compute((ThrowableComputable<Collection<PsiReference>, Throwable>) () -> {
-                String sig = method.getName() + ClassUtil.getAsmMethodSignature(method);
-                if (methodsSet.contains(sig)) {
-                    return PsiUtils.findUsage(method, true);
-                } else {
-                    return new ArrayList<>();
+            Collection<PsiReference> allRef = ReadAction.compute(new ThrowableComputable<Collection<PsiReference>, Throwable>() {
+                @Override
+                public Collection<PsiReference> compute() throws Throwable {
+                    String sig = method.getName() + ClassUtil.getAsmMethodSignature(method);
+                    if (methodsSet.contains(sig)) {
+                        return PsiUtils.findUsage(method, true);
+                    } else {
+                        return new ArrayList<>();
+                    }
                 }
             });
             if (allRef.size() > 0) {
-                WriteCommandAction.runWriteCommandAction(oldClass.getProject(), (Computable<Object>) () -> {
-                    for (PsiReference reference : allRef) {
-                        PsiElement element = reference.getElement();
-                        if (element instanceof PsiReferenceExpression) {
-                            ((PsiReferenceExpression)element).getQualifierExpression().replace(expression);
+                WriteCommandAction.runWriteCommandAction(oldClass.getProject(), new Computable<Object>() {
+                    @Override
+                    public Object compute() {
+                        for (PsiReference reference : allRef) {
+                            PsiElement element = reference.getElement();
+                            if (element instanceof PsiReferenceExpression) {
+                                ((PsiReferenceExpression) element).getQualifierExpression().replace(expression);
+                            }
                         }
+                        return null;
                     }
-                    return null;
                 });
             }
         }
