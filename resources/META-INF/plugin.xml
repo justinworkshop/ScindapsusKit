@@ -37,6 +37,8 @@
             </action>
             <action id="ExtraInterfaceAction_ID" class="action.ExtraInterfaceAction" text="ExtraInterface_Name"
                     description="extra inferface from the class"/>
+            <action id="StaticQRouteApiReplaceAction_ID" class="action.StaticQRouteApiReplaceAction" text="StaticQRouteApiReplaceAction_Name"
+                    description="抽取QRoute"/>
         </group>
     </actions>
 

@@ -35,16 +35,28 @@ public class ApiReplaceOperator {
         if (needReplaceMethod == null) {
             return;
         }
-        //生成QRoute语句作为target
-        PsiCallExpression expression = ReadAction.compute((ThrowableComputable<PsiCallExpression, Throwable>) () -> apiGetExpress(oldClass.getProject(), newInterface));
+        //生成QRoute语句作为target PsiMethodCallExpression:com.tencent.mobileqq.qroute.QRoute.api(MainUtil.class)
+        PsiCallExpression expression = ReadAction.compute(new ThrowableComputable<PsiCallExpression, Throwable>() {
+            @Override
+            public PsiCallExpression compute() throws Throwable {
+                return apiGetExpress(oldClass.getProject(), newInterface);
+            }
+        });
 
         //生成新接口中方法索引
         HashSet<String> methodsSet = new HashSet<>();
         for (PsiMethod method : needReplaceMethod) {
-            methodsSet.add(ReadAction.compute((ThrowableComputable<String, Throwable>) () -> method.getName() + ClassUtil.getAsmMethodSignature(method)));
+            methodsSet.add(ReadAction.compute(new ThrowableComputable<String, Throwable>() {
+                @Override
+                public String compute() throws Throwable {
+                    return method.getName() + ClassUtil.getAsmMethodSignature(method);
+                }
+            }));
         }
 
-        //逐一方法替换
+        //逐一方法替换 PsiClass:MainUtil
+        //PsiMethod:getInfo
+        //PsiMethod:sendMessage
         PsiMethod[] methodNeedToReplace = oldClass.getMethods();
         for (PsiMethod method : methodNeedToReplace) {
             //如果需要替换该方法
