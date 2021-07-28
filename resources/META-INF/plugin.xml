@@ -35,6 +35,8 @@
             <action id="ButterKnifePlugin" class="action.ButterKnifePlugin" text="ButterKnife">
                 <add-to-group group-id="GenerateGroup" anchor="first"/>
             </action>
+            <action id="ExtraInterfaceAction_ID" class="action.ExtraInterfaceAction" text="ExtraInterface_Name"
+                    description="extra inferface from the class"/>
         </group>
     </actions>
 
