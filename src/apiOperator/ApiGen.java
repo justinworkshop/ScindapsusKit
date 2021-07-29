@@ -42,6 +42,7 @@ public class ApiGen {
         return file;
     }
 
+    // 创建newClz
     public static PsiClass getInterfaceWithMemberInfo(Project project, PsiClass curClz, Collection<MemberInfo> memberInfos,
                                                       PsiDirectory dir, String packageName, String clzName, PsiClassType superClz, boolean isStatic) {
         String fqName = packageName + "." + clzName;
@@ -52,6 +53,8 @@ public class ApiGen {
             if (superClz != null) {
                 newClz.getExtendsList().add(JavaPsiFacade.getElementFactory(project).createReferenceElementByType(superClz));
             }
+            // 如何让clz直接继承QRouteApi ??
+//            newClz.getExtendsList().add(JavaPsiFacade.getElementFactory(project).createReferenceElementByType())
         }
         HashSet<String> curMethodSet = new HashSet<>();
         for (PsiMethod method : newClz.getMethods()) {

@@ -41,6 +41,8 @@
                     description="抽取QRoute"/>
             <action id="CheckQRouteRule_id" class="action.CheckQRouteRule" text="CheckQRouteRule_Name"
                     description="检测QRoute规则"/>
+            <action id="CreateExtendClass_ID" class="action.CreateExtendClass" text="CreateExtendClass_Name"
+                    description="创建带extends的class"/>
         </group>
     </actions>
 

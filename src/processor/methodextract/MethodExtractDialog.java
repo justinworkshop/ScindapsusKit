@@ -44,7 +44,7 @@ public class MethodExtractDialog extends MyRefactoringDialog {
             }
         }, true);
     }
-//extractInterface对话框
+
     @Override
     protected void doAction() {
         Collection<MemberInfo> extractMember = getSelectedMemberInfos();
@@ -60,23 +60,25 @@ public class MethodExtractDialog extends MyRefactoringDialog {
             }
         }
 
-        //修改一下接口路径
-        CommandProcessor.getInstance().executeCommand(myProject, () -> {
-            try {
-                preparePackage();
-            }
-            catch (IncorrectOperationException | ExtractSuperBaseDialog.OperationFailedException e) {
-                myPackageNameField.requestFocusInWindow();
-            }
-        }, RefactoringBundle.message("create.directory"), null);
-
+//        //修改一下接口路径
+//        CommandProcessor.getInstance().executeCommand(myProject, new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    MethodExtractDialog.this.preparePackage();
+//                } catch (IncorrectOperationException | ExtractSuperBaseDialog.OperationFailedException e) {
+//                    myPackageNameField.requestFocusInWindow();
+//                }
+//            }
+//        }, RefactoringBundle.message("create.directory"), null);
+//
         ProgressManager.getInstance().run(new Task.Backgroundable(myProject, "查找替换", true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 WriteCommandAction.runWriteCommandAction(myProject, new Runnable() {
                     @Override
                     public void run() {
-                        PsiClass psiClass = ApiGen.getInterfaceWithMemberInfo(myProject, mySourceClass, extractMember, dir, packName, newClz, null, false);
+                        ApiGen.getInterfaceWithMemberInfo(myProject, mySourceClass, extractMember, dir, packName, newClz, null, false);
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
                             public void run() {
