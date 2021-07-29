@@ -78,6 +78,7 @@ public class MethodExtractDialog extends MyRefactoringDialog {
                 WriteCommandAction.runWriteCommandAction(myProject, new Runnable() {
                     @Override
                     public void run() {
+                        // 重点是生成自定义目录下的一个接口, 接口中添加勾选的方法列表
                         ApiGen.getInterfaceWithMemberInfo(myProject, mySourceClass, extractMember, dir, packName, newClz, null, false);
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
