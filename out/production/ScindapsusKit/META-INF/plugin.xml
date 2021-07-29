@@ -39,6 +39,8 @@
                     description="extra inferface from the class"/>
             <action id="StaticQRouteApiReplaceAction_ID" class="action.StaticQRouteApiReplaceAction" text="StaticQRouteApiReplaceAction_Name"
                     description="抽取QRoute"/>
+            <action id="CheckQRouteRule_id" class="action.CheckQRouteRule" text="CheckQRouteRule_Name"
+                    description="检测QRoute规则"/>
         </group>
     </actions>
 
