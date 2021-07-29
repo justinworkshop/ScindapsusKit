@@ -60,7 +60,7 @@ public class ApiReplaceOperator {
         PsiMethod[] methodNeedToReplace = oldClass.getMethods();
         for (PsiMethod method : methodNeedToReplace) {
             //如果需要替换该方法
-            Collection<PsiReference> allRef = ReadAction.compute(new ThrowableComputable<Collection<PsiReference>, Throwable>() {
+            Collection<PsiReference> collection = ReadAction.compute(new ThrowableComputable<Collection<PsiReference>, Throwable>() {
                 @Override
                 public Collection<PsiReference> compute() throws Throwable {
                     String sig = method.getName() + ClassUtil.getAsmMethodSignature(method);
@@ -71,14 +71,16 @@ public class ApiReplaceOperator {
                     }
                 }
             });
-            if (allRef.size() > 0) {
+
+            if (collection.size() > 0) {
                 WriteCommandAction.runWriteCommandAction(oldClass.getProject(), new Computable<Object>() {
                     @Override
                     public Object compute() {
-                        for (PsiReference reference : allRef) {
+                        for (PsiReference reference : collection) {
                             PsiElement element = reference.getElement();
                             if (element instanceof PsiReferenceExpression) {
-                                ((PsiReferenceExpression) element).getQualifierExpression().replace(expression);
+                                PsiExpression qualifierExpression = ((PsiReferenceExpression) element).getQualifierExpression();
+                                qualifierExpression.replace(expression);
                             }
                         }
                         return null;
