@@ -27,7 +27,8 @@ public class FindViewByIdDialog extends JFrame implements ActionListener, IdBean
 
 
     // 标签JPanel
-    private JPanel mPanelTitle = new JPanel();
+    private JPanel mTopJPanel = new JPanel();
+    private JCheckBox mCheckAll = new JCheckBox("ViewWidget");
     private JLabel mTitleId = new JLabel("ViewId");
     private JLabel mTitleClick = new JLabel("OnClick");
     private JLabel mTitleField = new JLabel("ViewFiled");
@@ -42,8 +43,6 @@ public class FindViewByIdDialog extends JFrame implements ActionListener, IdBean
     // 底部JPanel
     // LayoutInflater JPanel
     private JPanel mPanelInflater = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    // 是否全选
-    private JCheckBox mCheckAll = new JCheckBox("ViewWidget");
     // 确定、取消JPanel
     private JPanel mPanelButtonRight = new JPanel();
     private JButton mButtonConfirm = new JButton("确定");
@@ -87,12 +86,12 @@ public class FindViewByIdDialog extends JFrame implements ActionListener, IdBean
                 isFdExist = false;
             }
 
-            // 如果当前没有该属性注解存在
-            if (!isFdExist) {
+            // 存在则不需要创建，否则要创建注解
+            if (isFdExist) {
+                element.setIsCreateFiled(false);
+            } else {
                 mCurrentAbleSize++;
                 element.setIsCreateFiled(true);
-            } else {
-                element.setIsCreateFiled(false);
             }
 
             mCheckAll.setSelected(mCurrentAbleSize == mElements.size());
@@ -104,19 +103,19 @@ public class FindViewByIdDialog extends JFrame implements ActionListener, IdBean
      * 添加头部
      */
     private void initTopPanel() {
-        mPanelTitle.setLayout(new GridLayout(1, 4, 10, 10));
-        mPanelTitle.setBorder(new EmptyBorder(5, 10, 5, 10));
+        mTopJPanel.setLayout(new GridLayout(1, 4, 10, 10));
+        mTopJPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
         mTitleId.setHorizontalAlignment(JLabel.LEFT);
         mTitleClick.setHorizontalAlignment(JLabel.LEFT);
         mTitleField.setHorizontalAlignment(JLabel.LEFT);
         // 添加到JPanel
-        mPanelTitle.add(mCheckAll);
-        mPanelTitle.add(mTitleId);
-        mPanelTitle.add(mTitleClick);
-        mPanelTitle.add(mTitleField);
-        mPanelTitle.setSize(720, 30);
+        mTopJPanel.add(mCheckAll);
+        mTopJPanel.add(mTitleId);
+        mTopJPanel.add(mTitleClick);
+        mTopJPanel.add(mTitleField);
+        mTopJPanel.setSize(720, 30);
         // 添加到JFrame
-        getContentPane().add(mPanelTitle, 0);
+        getContentPane().add(mTopJPanel, 0);
     }
 
     /**
@@ -151,8 +150,18 @@ public class FindViewByIdDialog extends JFrame implements ActionListener, IdBean
                     mElement);
             // 监听
             itemJPanel.setEnableActionListener(this);
-            itemJPanel.setClickActionListener(clickCheckBox -> mElement.setIsCreateClickMethod(clickCheckBox.isSelected()));
-            itemJPanel.setFieldFocusListener(fieldJTextField -> mElement.setFieldName(fieldJTextField.getText()));
+            itemJPanel.setClickActionListener(new IdBean.ClickActionListener() {
+                @Override
+                public void setClick(JCheckBox clickCheckBox) {
+                    mElement.setIsCreateClickMethod(clickCheckBox.isSelected());
+                }
+            });
+            itemJPanel.setFieldFocusListener(new IdBean.FieldFocusListener() {
+                @Override
+                public void setFieldName(JTextField fieldJTextField) {
+                    mElement.setFieldName(fieldJTextField.getText());
+                }
+            });
             mContentJPanel.add(itemJPanel);
             mContentConstraints.fill = GridBagConstraints.HORIZONTAL;
             mContentConstraints.gridwidth = 0;
@@ -185,7 +194,7 @@ public class FindViewByIdDialog extends JFrame implements ActionListener, IdBean
         // 列拉伸0不拉伸，1完全拉伸
         mConstraints.weighty = 0;
         // 设置组件
-        mLayout.setConstraints(mPanelTitle, mConstraints);
+        mLayout.setConstraints(mTopJPanel, mConstraints);
         mConstraints.fill = GridBagConstraints.BOTH;
         mConstraints.gridwidth = 1;
         mConstraints.gridx = 0;

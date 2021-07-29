@@ -33,40 +33,40 @@ import java.util.List;
 public class ButterKnifePlugin extends AnAction {
 
     private FindViewByIdDialog mDialog;
-    private String xmlFilename;
+    private String xmlFileName;
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
-        // 1.获取用户选择的layout文件的名字
+        // 1.提取用户选择的layout文件的名字
         Project project = anActionEvent.getProject();
         // 得到编辑区对象
-        Editor mEditor = anActionEvent.getData(PlatformDataKeys.EDITOR);
-        if (null == mEditor) {
+        Editor editor = anActionEvent.getData(PlatformDataKeys.EDITOR);
+        if (null == editor) {
             return;
         }
         // 获取用户选择的字符
-        SelectionModel model = mEditor.getSelectionModel();
-        xmlFilename = model.getSelectedText();
-        if (TextUtils.isEmpty(xmlFilename)) {
+        SelectionModel model = editor.getSelectionModel();
+        xmlFileName = model.getSelectedText();
+        if (TextUtils.isEmpty(xmlFileName)) {
             // 获取光标所在的位置对应的布局文件
-            xmlFilename = getCurrentLayout(mEditor);
-            if (TextUtils.isEmpty(xmlFilename)) {
-                xmlFilename = Messages.showInputDialog(project, "请输入layout名", "未输入", Messages.getInformationIcon());
-                if (TextUtils.isEmpty(xmlFilename)) {
-                    Util.showPopupBalloon(mEditor, "用户没有输入layout", 5);
+            xmlFileName = getCurrentLayoutName(editor);
+            if (TextUtils.isEmpty(xmlFileName)) {
+                xmlFileName = Messages.showInputDialog(project, "请输入layout名", "未输入", Messages.getInformationIcon());
+                if (TextUtils.isEmpty(xmlFileName)) {
+                    Util.showPopupBalloon(editor, "用户没有输入layout", 5);
                     return;
                 }
             }
         }
 
-        // 2.找到对应的XML文件，并把XML文件中所有的ID都获取出来并记录下来（保存到一个集合中）
-        PsiFile[] psiFiles = FilenameIndex.getFilesByName(project, xmlFilename + ".xml", GlobalSearchScope.allScope(project));
+        // 2.根据layout名称找到XML文件，并把XML文件中所有的ID都获取出来并记录下来（保存到一个集合中）
+        PsiFile[] psiFiles = FilenameIndex.getFilesByName(project, xmlFileName + ".xml", GlobalSearchScope.allScope(project));
         if (psiFiles.length == 0) {
-            Util.showPopupBalloon(mEditor, "未找到选中的布局文件" + xmlFilename, 5);
+            Util.showPopupBalloon(editor, "未找到选中的布局文件" + xmlFileName, 5);
             return;
         }
 
-        // 如果找到了XML文件,就去得到这零点文件对应的PSI对象
+        // 如果找到了XML文件,就去得到这Layout文件对应的PSI对象
         XmlFile xmlFile = (XmlFile) psiFiles[0];
         // 开始解析XML JDOM  DOM4J  pull
         List<Element> elements = new ArrayList();
@@ -78,14 +78,15 @@ public class ButterKnifePlugin extends AnAction {
         // 3.生成UI,并根据用户的选择生成代码
         if (elements.size() != 0) {
             // 得到一个psiFile
-            PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(mEditor, project);
-            PsiClass psiClass = Util.getTargetClass(mEditor, psiFile);
-            mDialog = new FindViewByIdDialog(mEditor, project, psiFile, psiClass, elements, xmlFilename);
+            PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
+            PsiClass psiClass = Util.getTargetClass(editor, psiFile);
+            // psiFile: MainActivity.java, psiClass: MainActivity.class
+            mDialog = new FindViewByIdDialog(editor, project, psiFile, psiClass, elements, xmlFileName);
             mDialog.showDialog();
         }
     }
 
-    private String getCurrentLayout(Editor editor) {
+    private String getCurrentLayoutName(Editor editor) {
         Document document = editor.getDocument();
         // 获取光标对象
         CaretModel caretModel = editor.getCaretModel();
@@ -100,7 +101,7 @@ public class ButterKnifePlugin extends AnAction {
         String layoutMatching = "R.layout.";
 
         if (!TextUtils.isEmpty(lineContent) && lineContent.contains(layoutMatching)) {
-            // 获取layout文件的字符串
+            // 提取layout文件的字符串
             int startPosition = lineContent.indexOf(layoutMatching) + layoutMatching.length();
             int endPosition = lineContent.indexOf(")", startPosition);
             String layoutStr = lineContent.substring(startPosition, endPosition);
