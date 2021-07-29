@@ -69,8 +69,8 @@ public class StaticMethodReplaceDialog extends MyRefactoringDialog {
     protected void doAction() {
         //获取勾选的方法
         Collection<MemberInfo> extractMember = getSelectedMemberInfos();
-        String packName = getTargetPackageName();
-        String newClz = getExtractedSuperName();
+        String packName = getTargetPackageName(); // com.example.firsttest
+        String newClz = getExtractedSuperName(); // MainUtil
 
         //需要进行替换的方法列表
         //PsiMethod:getInfo
@@ -81,26 +81,31 @@ public class StaticMethodReplaceDialog extends MyRefactoringDialog {
                 methodList.add((PsiMethod) info.getMember());
             }
         }
-
+        // 找到MainUtil.class
         PsiClass newClass = JavaPsiFacade.getInstance(myProject).findClass(packName + "." + newClz, GlobalSearchScope.allScope(myProject));
 
         //弹出选择替换区域的弹窗
-        Runnable runnable = () -> ProgressManager.getInstance().run(new Task.Backgroundable(myProject, "查找替换", true) {
+        Runnable runnable = new Runnable() {
             @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                ApplicationManager.getApplication().invokeLater(new Runnable() {
+            public void run() {
+                ProgressManager.getInstance().run(new Task.Backgroundable(myProject, "查找替换", true) {
                     @Override
-                    public void run() {
-                        StaticMethodReplaceDialog.this.closeOKAction();
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        ApplicationManager.getApplication().invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                StaticMethodReplaceDialog.this.closeOKAction();
+                            }
+                        });
+                        try {
+                            ApiReplaceOperator.replaceStaticCall(mySourceClass, newClass, methodList);
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
                     }
                 });
-                try {
-                    ApiReplaceOperator.replaceStaticCall(mySourceClass, newClass, methodList);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
             }
-        });
+        };
         ReplaceHelper.runWithReplaceDamianChoose(myProject, runnable);
     }
 }

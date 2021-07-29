@@ -43,6 +43,8 @@
                     description="检测QRoute规则"/>
             <action id="CreateExtendClass_ID" class="action.CreateExtendClass" text="CreateExtendClass_Name"
                     description="创建带extends的class"/>
+            <action id="ReplaceMemberMethod_ID" class="action.ReplaceMemberMethod" text="ReplaceMemberMethod_Name"
+                    description="替换QRoute成员方法"/>
         </group>
     </actions>
 
