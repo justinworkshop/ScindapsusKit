@@ -12,15 +12,25 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 
+/**
+ * QRoute文件规范检查
+ * 1.获取文件名
+ * 2.获取当前待类的包名、类名
+ * 3.生成对应Impl的包名、类名
+ * 4.在Project中check是否存在此包名、类名的文件
+ */
 public class CheckQRouteRule extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
         Project project = anActionEvent.getProject();
         Editor editor = anActionEvent.getData(CommonDataKeys.EDITOR);
+        // 1.获取编辑区当前的PsiFile
         PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
 
+        // 2.获取包名，类名
         String packageName = "";
+        String className = psiFile.getName().split(".java")[0];
         // 包名/Import/WhiteBlank/PsiClass
         for (PsiElement psiElement : psiFile.getChildren()) {
             if (psiElement instanceof PsiPackageStatement) {
@@ -37,19 +47,30 @@ public class CheckQRouteRule extends AnAction {
             }
         }
 
+        // 3.生成对应Impl的包名、类名
+        try {
+            String implPkg = packageName + ".impl";
+            String implClzName = className.split("I")[1] + "Impl";
+            System.out.println("Impl类全限定名：" + implPkg + "." + implClzName);
+        } catch (Exception e) {
+
+        }
+
+
+        // 4.检查文件是否存在
         VirtualFile virtualFile = anActionEvent.getData(PlatformDataKeys.VIRTUAL_FILE);
-        findFileByName(packageName, psiFile.getName().split(".java")[0], project);
+        findFileByName(packageName, className, project);
 
 
         // 测试获取project所有文件，这里包括jar内的文件，并且只有文件名，不是很合适。
-        findProjectAllFiles(project);
+//        findProjectAllFiles(project);
     }
 
     /**
      * 根据指定包名&类名查找文件
      *
      * @param packageName : com.example.firsttes
-     * @param fileName : MainActivity
+     * @param fileName    : MainActivity
      * @param project
      */
     private void findFileByName(String packageName, String fileName, Project project) {
