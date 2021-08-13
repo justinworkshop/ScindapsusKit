@@ -45,7 +45,6 @@ public class DepsAnalysisHolder {
             return false;
         }
 
-
         if (analysis != null) {
             return !analysis.curClzInDepsSet(targetClz);
         }
@@ -56,7 +55,11 @@ public class DepsAnalysisHolder {
         if (module == null || oldModule == null) {
             return false;
         }
-        return !module.equals(oldModule);
+
+        boolean equals = module.equals(oldModule);
+        System.out.println("module.equals(oldModule) = " + equals);
+
+        return !equals;
     }
 
 }

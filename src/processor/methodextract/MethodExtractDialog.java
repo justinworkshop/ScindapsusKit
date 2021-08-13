@@ -2,7 +2,6 @@ package processor.methodextract;
 
 import apiOperator.ApiGen;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -10,20 +9,17 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
-import com.intellij.refactoring.RefactoringBundle;
 import com.intellij.refactoring.classMembers.MemberInfoBase;
-import com.intellij.refactoring.extractSuperclass.ExtractSuperBaseDialog;
 import com.intellij.refactoring.util.classMembers.MemberInfo;
-import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import view.dialog.MyRefactoringDialog;
+import view.dialog.CustomRefactorDialog;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MethodExtractDialog extends MyRefactoringDialog {
+public class MethodExtractDialog extends CustomRefactorDialog {
 
     public MethodExtractDialog(@Nullable Project project, PsiClass clz, List<PsiMethod> hasOutDeps) {
         super(project, clz, collectMembers(clz), hasOutDeps);

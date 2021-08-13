@@ -1,6 +1,5 @@
 package processor.staticmethod;
 
-import apiOperator.ApiReplaceOperator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -13,20 +12,24 @@ import com.intellij.refactoring.classMembers.MemberInfoBase;
 import com.intellij.refactoring.util.classMembers.MemberInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import utils.ReplaceHelper;
-import view.dialog.MyRefactoringDialog;
+import utils.ReplaceStaticMethodUtil;
+import view.dialog.CustomRefactorDialog;
+import view.dialog.ReplaceDialog;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+
 /**
- * 选择需要替换的方法，仅替换需要选择的方法，之后弹出一个窗口，用于排除或者选中需要替换的文件
+ * QRoute规则替换，用于将Util类的静态方法替换为QRoute的引用方式
+ * 原始：TimeUtil.getCurrentTime();
+ * 替换：QRoute.api(ITimeUtil.class).getCurrentTime();
  */
-public class StaticMethodReplaceDialog extends MyRefactoringDialog {
-    public StaticMethodReplaceDialog(@Nullable Project project, PsiClass clz, List<PsiMethod> hasOutDeps) {
-        super(project, clz, collectMembers(clz), hasOutDeps);
+public class QRouteReplaceStaticMethodDialog extends CustomRefactorDialog {
+    public QRouteReplaceStaticMethodDialog(@Nullable Project project, PsiClass clz) {
+        super(project, clz, collectMembers(clz), null);
     }
 
     private static List<MemberInfo> collectMembers(PsiClass clz) {
@@ -56,49 +59,35 @@ public class StaticMethodReplaceDialog extends MyRefactoringDialog {
     }
 
     @Override
-    protected String getTopLabelText() {
-        return "the class need to replace";
-    }
-
-    @Override
-    protected String getTableTitle() {
-        return "the method need to replace";
-    }
-
-    @Override
     protected void doAction() {
-        //获取勾选的方法
-        Collection<MemberInfo> extractMember = getSelectedMemberInfos();
-        String packName = getTargetPackageName(); // com.example.firsttest
-        String newClz = getExtractedSuperName(); // MainUtil
+        // 获取目标包名 com.example.firsttest
+        String packageName = getTargetPackageName();
+        // 获取class文件 TimeUtil
+        String className = getExtractedSuperName();
+        // 获取选中方法
+        Collection<MemberInfo> selectedMemberInfos = getSelectedMemberInfos();
 
-        //需要进行替换的方法列表
-        //PsiMethod:getInfo
-        //PsiMethod:sendMessage
-        List<PsiMethod> methodList = new ArrayList<>();
-        for (MemberInfo info : extractMember) {
-            if (info.getMember() instanceof PsiMethod) {
-                methodList.add((PsiMethod) info.getMember());
-            }
-        }
-        // 找到MainUtil.class
-        PsiClass newClass = JavaPsiFacade.getInstance(myProject).findClass(packName + "." + newClz, GlobalSearchScope.allScope(myProject));
+        // 根据selectedMemberInfos获得List<PsiMethod>
+        List<PsiMethod> methodList = getSelectedPsiMethods(selectedMemberInfos);
+        // 找到TimeUtil.class
+        String qualifiedClassName = packageName + "." + className;
+        PsiClass newClass = JavaPsiFacade.getInstance(myProject).findClass(qualifiedClassName, GlobalSearchScope.allScope(myProject));
 
-        //弹出选择替换区域的弹窗
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 ProgressManager.getInstance().run(new Task.Backgroundable(myProject, "查找替换", true) {
                     @Override
                     public void run(@NotNull ProgressIndicator indicator) {
+                        // 插件需要这样切到事件分发线程
                         ApplicationManager.getApplication().invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                StaticMethodReplaceDialog.this.closeOKAction();
+                                QRouteReplaceStaticMethodDialog.this.closeOKAction();
                             }
                         });
                         try {
-                            ApiReplaceOperator.replaceStaticCall(mySourceClass, newClass, methodList);
+                            ReplaceStaticMethodUtil.replaceStaticMethod(newClass, methodList);
                         } catch (Throwable throwable) {
                             throwable.printStackTrace();
                         }
@@ -106,6 +95,21 @@ public class StaticMethodReplaceDialog extends MyRefactoringDialog {
                 });
             }
         };
-        ReplaceHelper.runWithReplaceDamianChoose(myProject, runnable);
+
+        // 弹出选择区域的对话框
+        ReplaceDialog dialog = new ReplaceDialog(myProject);
+        dialog.setAfterOkAction(runnable);
+        dialog.show();
+    }
+
+    @NotNull
+    private List<PsiMethod> getSelectedPsiMethods(Collection<MemberInfo> extractMember) {
+        List<PsiMethod> methodList = new ArrayList<>();
+        for (MemberInfo memberInfo : extractMember) {
+            if (memberInfo.getMember() instanceof PsiMethod) {
+                methodList.add((PsiMethod) memberInfo.getMember());
+            }
+        }
+        return methodList;
     }
 }

@@ -47,18 +47,25 @@ public class PsiUtils {
      * @return 返回符合条件的应用
      */
     public static Collection<PsiReference> findUsage(PsiMethod method, boolean forReplace) {
+        // 查找所有调用此方法的地方
         Query<PsiReference> ref = MethodReferencesSearch.search(method);
         ref = ref.allowParallelProcessing();
         Collection<PsiReference> referenceCollection = ref.findAll();
-        List<PsiReference> references = new ArrayList<>();
+
+        List<PsiReference> resultRef = new ArrayList<>();
         for (PsiReference reference : referenceCollection) {
             PsiElement element = reference.getElement();
+            System.out.println("遍历所有调用的集合：" + element.toString());
+
             if (DepsAnalysisHolder.getInstance().isDeps(PsiUtil.getTopLevelClass(method), PsiUtil.getTopLevelClass(element))) {
-                references.add(reference);
+                System.out.println("注意了，这个是依赖 " + element);
+                resultRef.add(reference);
+            } else {
+                System.out.println("不是依赖：" + element);
             }
         }
         //看看是不是在自己类之外的，如果
-        return references;
+        return resultRef;
     }
 
     public static Collection<PsiReference> findClassUsage(PsiClass clz) {

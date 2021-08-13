@@ -31,27 +31,46 @@ public class ApiReplaceOperator {
         return expression;
     }
 
-    public static void replaceStaticCall(PsiClass oldClass, PsiClass newInterface, List<PsiMethod> needReplaceMethod) throws Throwable {
+    // 点击确定指定的方法： 勾选的方法
+
+    /**
+     * @param oldClass
+     * @param newInterface
+     * @param needReplaceMethod
+     * @throws Throwable
+     * 1.生成待替换的表达式
+     * 2.
+     */
+    public static void replaceStaticMethod(PsiClass oldClass, PsiClass newInterface, List<PsiMethod> needReplaceMethod) throws Throwable {
         if (needReplaceMethod == null) {
             return;
         }
+        System.out.println("整个大方法的线程 replaceStaticCall: " + Thread.currentThread().getName());
+
         //生成QRoute语句作为target PsiMethodCallExpression:com.tencent.mobileqq.qroute.QRoute.api(MainUtil.class)
         PsiCallExpression expression = ReadAction.compute(new ThrowableComputable<PsiCallExpression, Throwable>() {
             @Override
             public PsiCallExpression compute() throws Throwable {
-                return apiGetExpress(oldClass.getProject(), newInterface);
+                PsiCallExpression psiCallExpression = apiGetExpress(oldClass.getProject(), newInterface);
+                System.out.println("生成target替换语句 Compute inThread: " + Thread.currentThread().getName() + ", psiCallExpression: " + psiCallExpression);
+                return psiCallExpression;
             }
         });
 
-        //生成新接口中方法索引
+        // 生成新接口中方法索引
+        // getInfo()V
+        // sendMessage(Ljava/lang/String;)Z
         HashSet<String> methodsSet = new HashSet<>();
         for (PsiMethod method : needReplaceMethod) {
-            methodsSet.add(ReadAction.compute(new ThrowableComputable<String, Throwable>() {
+            String compute = ReadAction.compute(new ThrowableComputable<String, Throwable>() {
                 @Override
                 public String compute() throws Throwable {
-                    return method.getName() + ClassUtil.getAsmMethodSignature(method);
+                    String methodSig = method.getName() + ClassUtil.getAsmMethodSignature(method);
+                    System.out.println("待替换方法签名 methodSig: " + methodSig);
+                    return methodSig;
                 }
-            }));
+            });
+            methodsSet.add(compute);
         }
 
         //逐一方法替换 oldClass: PsiClass:MainUtil
@@ -59,7 +78,7 @@ public class ApiReplaceOperator {
         //PsiMethod:sendMessage
         PsiMethod[] methodNeedToReplace = oldClass.getMethods();
         for (PsiMethod method : methodNeedToReplace) {
-            //如果需要替换该方法
+            // 找到使用该方法的集合
             Collection<PsiReference> collection = ReadAction.compute(new ThrowableComputable<Collection<PsiReference>, Throwable>() {
                 @Override
                 public Collection<PsiReference> compute() throws Throwable {
@@ -72,14 +91,19 @@ public class ApiReplaceOperator {
                 }
             });
 
+            // 这里是判断这个方法 有几处要替换
             if (collection.size() > 0) {
                 WriteCommandAction.runWriteCommandAction(oldClass.getProject(), new Computable<Object>() {
                     @Override
                     public Object compute() {
                         for (PsiReference reference : collection) {
                             PsiElement element = reference.getElement();
+                            System.out.println("遍历有几处 replace ? >>> " + element.toString());
+
                             if (element instanceof PsiReferenceExpression) {
                                 PsiExpression qualifierExpression = ((PsiReferenceExpression) element).getQualifierExpression();
+                                System.out.println("qualifierExpression ? >>> " + qualifierExpression.toString());
+                                System.out.println("expression ? >>> " + expression.toString());
                                 qualifierExpression.replace(expression);
                             }
                         }

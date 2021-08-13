@@ -7,7 +7,7 @@ import com.intellij.refactoring.classMembers.MemberInfoModel;
 import com.intellij.refactoring.ui.MemberSelectionTable;
 import com.intellij.refactoring.util.classMembers.MemberInfo;
 import org.jetbrains.annotations.Nullable;
-import view.dialog.MyRefactoringDialog;
+import view.dialog.CustomRefactorDialog;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +34,7 @@ public class StaticMemberSelectionTable extends MemberSelectionTable {
         if (!(memberInfo.getMember() instanceof PsiMethod)) {
             return null;
         }
-        if (MyRefactoringDialog.outDeps == null) {
+        if (CustomRefactorDialog.outDependentList == null) {
             return null;
         }
         PsiMethod method = (PsiMethod) memberInfo.getMember();
@@ -42,7 +42,7 @@ public class StaticMemberSelectionTable extends MemberSelectionTable {
     }
 
     private void initSet() {
-        List<PsiMethod> outDeps = MyRefactoringDialog.outDeps;
+        List<PsiMethod> outDeps = CustomRefactorDialog.outDependentList;
         if (outDeps != null) {
             for (PsiMethod method : outDeps) {
                 sigSet.add(method.getName() + ClassUtil.getAsmMethodSignature(method));

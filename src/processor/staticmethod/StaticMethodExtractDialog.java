@@ -19,13 +19,13 @@ import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import utils.ClassNameUtils;
-import view.dialog.MyRefactoringDialog;
+import view.dialog.CustomRefactorDialog;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class StaticMethodExtractDialog extends MyRefactoringDialog {
+public class StaticMethodExtractDialog extends CustomRefactorDialog {
 
     public StaticMethodExtractDialog(@Nullable Project project, PsiClass clz, List<PsiMethod> hasOutDeps) {
         super(project, clz, collectMembers(clz), hasOutDeps);

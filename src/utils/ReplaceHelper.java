@@ -9,11 +9,4 @@ import view.dialog.ReplaceDialog;
 public class ReplaceHelper {
 
 
-    public static void runWithReplaceDamianChoose(Project project, Runnable replaceRunnable) {
-        //弹出选择区域的对话框
-        ReplaceDialog dialog = new ReplaceDialog(project);
-        dialog.setAfterOkAction(replaceRunnable);
-        dialog.show();
-    }
-
 }
